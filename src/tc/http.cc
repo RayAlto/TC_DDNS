@@ -83,8 +83,13 @@ Request::Request(const std::string& url,
     std::map<std::string, std::string>::const_iterator param_iter_last =
         --(params.end());
     while (param_iter != param_iter_last) {
-        url_with_params += url_encode(param_iter->first) + '='
-                           + url_encode(param_iter->second) + '&';
+        if (param_iter->second.empty()) {
+            url_with_params += url_encode(param_iter->first) + '&';
+        }
+        else {
+            url_with_params += url_encode(param_iter->first) + '='
+                               + url_encode(param_iter->second) + '&';
+        }
         param_iter++;
     }
     url_with_params +=
