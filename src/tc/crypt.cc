@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <cstdint>
+#include <variant>
 #include <vector>
 
 #include "openssl/crypto.h"
@@ -41,6 +42,38 @@ std::vector<std::uint8_t> hmac_sha256(const std::vector<std::uint8_t>& key,
                        key.size(),
                        reinterpret_cast<const unsigned char*>(data.data()),
                        data.size());
+}
+
+std::vector<std::uint8_t> hmac_sha256(
+    const std::variant<std::string, std::vector<std::uint8_t>>& key,
+    const std::variant<std::string, std::vector<std::uint8_t>>& data) {
+    const unsigned char* p_key = nullptr;
+    std::size_t key_len = 0;
+    const unsigned char* p_data = nullptr;
+    std::size_t data_len = 0;
+    if (std::holds_alternative<std::string>(key)) {
+        const std::string& key_str = std::get<std::string>(key);
+        p_key = reinterpret_cast<const unsigned char*>(key_str.c_str());
+        key_len = key_str.length();
+    }
+    else if (std::holds_alternative<std::vector<std::uint8_t>>(key)) {
+        const std::vector<std::uint8_t>& key_bytes =
+            std::get<std::vector<std::uint8_t>>(key);
+        p_key = reinterpret_cast<const unsigned char*>(key_bytes.data());
+        key_len = key_bytes.size();
+    }
+    if (std::holds_alternative<std::string>(data)) {
+        const std::string& data_str = std::get<std::string>(data);
+        p_data = reinterpret_cast<const unsigned char*>(data_str.c_str());
+        data_len = data_str.length();
+    }
+    else if (std::holds_alternative<std::vector<std::uint8_t>>(data)) {
+        const std::vector<std::uint8_t>& data_bytes =
+            std::get<std::vector<std::uint8_t>>(data);
+        p_data = reinterpret_cast<const unsigned char*>(data_bytes.data());
+        data_len = data_bytes.size();
+    }
+    return hmac_sha256(p_key, key_len, p_data, data_len);
 }
 
 std::vector<std::uint8_t> sha256(const unsigned char* data,
