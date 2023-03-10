@@ -12,6 +12,10 @@ namespace tc::util {
  * Convert the date and time information now to string.
  *   Not thread safe (use gmtime)
  */
+std::int64_t unix_timestamp();
+std::string utc_format(const std::int64_t& unix_timestamp,
+                       const std::string& format,
+                       const std::size_t& buf_len = 32);
 std::string utc_format(const std::string& format,
                        const std::size_t& buf_len = 32);
 

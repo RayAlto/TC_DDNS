@@ -28,6 +28,21 @@ constexpr std::uint8_t hex2byte(const char& l, const char& r) {
     return bin;
 }
 
+std::int64_t unix_timestamp() {
+    return static_cast<std::int64_t>(std::time(nullptr));
+}
+
+std::string utc_format(const std::int64_t& unix_timestamp,
+                       const std::string& format,
+                       const std::size_t& buf_len) {
+    std::time_t now = static_cast<std::time_t>(unix_timestamp);
+    std::tm* now_tm = std::gmtime(&now);
+    char utc_buf[buf_len];
+    std::size_t utc_str_len =
+        std::strftime(utc_buf, buf_len, format.c_str(), now_tm);
+    return {utc_buf, utc_str_len};
+}
+
 std::string utc_format(const std::string& format, const std::size_t& buf_len) {
     std::time_t now = std::time(nullptr);
     std::tm* now_tm = std::gmtime(&now);
