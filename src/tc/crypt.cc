@@ -2,8 +2,10 @@
 #include <cstdint>
 #include <vector>
 
-#include "openssl/hmac.h"
+#include "openssl/crypto.h"
 #include "openssl/evp.h"
+#include "openssl/hmac.h"
+#include "openssl/sha.h"
 
 #include "tc/crypt.h"
 
@@ -39,6 +41,25 @@ std::vector<std::uint8_t> hmac_sha256(const std::vector<std::uint8_t>& key,
                        key.size(),
                        reinterpret_cast<const unsigned char*>(data.data()),
                        data.size());
+}
+
+std::vector<std::uint8_t> sha256(const unsigned char* data,
+                                 const std::size_t& data_len) {
+    std::size_t digested_len = EVP_MD_size(EVP_sha256());
+    unsigned char digest_buf[digested_len];
+    if (SHA256(data, data_len, digest_buf) == nullptr) {
+        return {};
+    }
+    return {digest_buf, digest_buf + digested_len};
+}
+
+std::vector<std::uint8_t> sha256(const std::string& data) {
+    return sha256(reinterpret_cast<const unsigned char*>(data.c_str()),
+                  data.length());
+}
+
+std::vector<std::uint8_t> sha256(const std::vector<std::uint8_t>& data) {
+    return sha256(data.data(), data.size());
 }
 
 } // namespace tc::crypt
